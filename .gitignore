@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.env
+
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+*.tmp
+*.bak
+.vscode/
+.idea/
+
+# Duplicate audio (audio/ is the primary source)
+CET-6听力/
+temp_astrbot/CET-6听力/

@@ -1,0 +1,11 @@
+{
+  "name": "cet6-memory-web",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "build:data": "node scripts/build-lessons.mjs",
+    "serve": "node server.mjs"
+  }
+}
