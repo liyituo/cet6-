@@ -10,8 +10,12 @@ def build():
     with open('words_data.json', 'r', encoding='utf-8') as f:
         words_data = json.load(f)
 
-    # Convert words_data to a compact JSON string to embed directly in script
+    with open('high_freq_data.json', 'r', encoding='utf-8') as f:
+        hf_data = json.load(f)
+
+    # Convert words_data and hf_data to compact JSON strings to embed directly in script
     words_json_str = json.dumps(words_data, ensure_ascii=False)
+    hf_json_str = json.dumps(hf_data, ensure_ascii=False, separators=(',', ':'))
 
     html_content = f'''<!DOCTYPE html>
 <html lang="zh-CN">
@@ -1239,7 +1243,325 @@ def build():
     }}
     .shortcut-row:last-child {{ border-bottom: none; }}
 
+    /* ====== HIGH FREQUENCY MODULE ====== */
+    .hf-hero-card {{
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px 22px;
+      margin-bottom: 18px;
+      box-shadow: var(--shadow-sm);
+    }}
+
+    .hf-hero-top {{
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }}
+
+    .hf-hero-title {{
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }}
+
+    .hf-hero-sub {{
+      font-size: 13px;
+      color: var(--text-sub);
+    }}
+
+    .hf-overall-prog {{
+      min-width: 220px;
+      flex: 0 1 280px;
+    }}
+
+    .hf-tier-grid {{
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }}
+
+    .hf-tier-card {{
+      background: var(--bg-card-subtle);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: var(--transition);
+      text-align: left;
+    }}
+
+    .hf-tier-card:hover {{
+      border-color: var(--border-focus);
+      transform: translateY(-1px);
+    }}
+
+    .hf-tier-card.active {{
+      background: var(--primary-subtle);
+      border-color: var(--primary);
+      box-shadow: 0 2px 8px rgba(79, 70, 229, 0.14);
+    }}
+
+    .hf-tier-title {{
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+    }}
+
+    .hf-tier-meta {{
+      font-size: 12px;
+      color: var(--text-sub);
+      margin-bottom: 6px;
+    }}
+
+    .hf-mini-track {{
+      height: 5px;
+      background: rgba(148, 163, 184, 0.25);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+    }}
+
+    .hf-mini-fill {{
+      height: 100%;
+      background: var(--success);
+      border-radius: var(--radius-full);
+      transition: width 0.35s ease;
+    }}
+
+    .hf-action-bar {{
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }}
+
+    .hf-filter-bar {{
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 14px 18px;
+      margin-bottom: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }}
+
+    .hf-filter-row {{
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }}
+
+    .hf-row {{
+      display: grid;
+      grid-template-columns: 74px 190px 1fr 112px 40px;
+      align-items: start;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s ease;
+      font-size: 14px;
+    }}
+
+    .hf-row:last-child {{
+      border-bottom: none;
+    }}
+
+    .hf-row:hover {{
+      background: var(--bg-card-hover);
+    }}
+
+    .hf-rank-col {{
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+    }}
+
+    .hf-rank-badge {{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: var(--radius-sm);
+      color: #fff;
+      background: var(--pos-other);
+      min-width: 48px;
+    }}
+    .hf-rank-badge.tier-1 {{ background: linear-gradient(135deg, #ef4444 0%, #f97316 100%); }}
+    .hf-rank-badge.tier-2 {{ background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }}
+    .hf-rank-badge.tier-3 {{ background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%); }}
+    .hf-rank-badge.tier-0 {{ background: var(--success); }}
+
+    .hf-stars {{
+      font-size: 10px;
+      letter-spacing: 1px;
+      color: var(--star);
+      line-height: 1;
+    }}
+
+    .hf-word-col {{
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }}
+
+    .hf-word-head {{
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 800;
+      font-size: 17px;
+      color: var(--text-main);
+    }}
+
+    .hf-meta-pills {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 4px;
+    }}
+
+    .hf-pill {{
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: var(--radius-full);
+      background: var(--bg-card-subtle);
+      color: var(--text-sub);
+      border: 1px solid var(--border);
+    }}
+    .hf-pill.hot {{
+      background: var(--danger-subtle);
+      color: var(--danger);
+      border-color: transparent;
+    }}
+    .hf-pill.wb {{
+      background: var(--warning-subtle);
+      color: var(--warning);
+      border-color: transparent;
+    }}
+    .hf-pill.opt {{
+      background: var(--primary-subtle);
+      color: var(--primary);
+      border-color: transparent;
+    }}
+
+    .hf-example-box {{
+      margin-top: 8px;
+      padding: 8px 11px;
+      border-left: 3px solid var(--primary);
+      background: var(--bg-card-subtle);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      font-size: 12.5px;
+      color: var(--text-sub);
+      line-height: 1.55;
+    }}
+
+    .hf-example-src {{
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-right: 6px;
+    }}
+
+    .hf-kw {{
+      background: var(--warning-subtle);
+      color: var(--text-main);
+      font-weight: 700;
+      padding: 0 3px;
+      border-radius: 3px;
+      border-bottom: 1.5px solid var(--warning);
+    }}
+
+    .mask-en .hf-kw {{
+      filter: blur(5px);
+      opacity: 0.25;
+      cursor: pointer;
+      transition: filter 0.2s, opacity 0.2s;
+    }}
+    .mask-en .hf-kw:hover, .mask-en .hf-kw.unmasked {{
+      filter: blur(0);
+      opacity: 1;
+    }}
+
+    .hf-card-badge {{
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      background: var(--danger-subtle);
+      color: var(--danger);
+      margin-bottom: 12px;
+    }}
+
+    .hf-list-badge {{
+      display: inline-flex;
+      align-items: center;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: var(--radius-full);
+      background: var(--warning-subtle);
+      color: var(--warning);
+      white-space: nowrap;
+    }}
+
+    .card-hf-example {{
+      font-size: 12.5px;
+      color: var(--text-sub);
+      line-height: 1.5;
+      max-width: 90%;
+      text-align: left;
+      border-left: 3px solid var(--primary);
+      background: var(--bg-card-subtle);
+      padding: 8px 12px;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      margin-top: 8px;
+      max-height: 82px;
+      overflow-y: auto;
+    }}
+
     @media (max-width: 768px) {{
+      .hf-tier-grid {{
+        grid-template-columns: repeat(2, 1fr);
+      }}
+      .hf-row {{
+        grid-template-columns: 64px 1fr 38px;
+        grid-template-areas:
+          "rank word star"
+          "trans trans trans"
+          "status status status";
+        gap: 8px;
+      }}
+      .hf-rank-col {{ grid-area: rank; }}
+      .hf-word-col {{ grid-area: word; }}
+      .hf-trans-col {{ grid-area: trans; }}
+      .hf-status-col {{ grid-area: status; justify-content: flex-start !important; }}
+      .hf-star-col {{ grid-area: star; }}
       .stats-ribbon {{
         grid-template-columns: repeat(2, 1fr);
       }}
@@ -1287,6 +1609,11 @@ def build():
         <!-- 45-Day Checklist Link -->
         <a href="六级45天通关打卡清单.html" class="icon-btn" style="text-decoration: none; font-weight: 600;" title="查看45天每日复习打卡清单">
           <span>📋 45天打卡清单</span>
+        </a>
+
+        <!-- Reading Real Exam Platform -->
+        <a href="cet6_reading_platform.html" class="icon-btn" style="text-decoration: none; font-weight: 600; color: var(--primary); border-color: var(--border-focus); background: var(--primary-subtle);" title="前往历年阅读真题全真复习平台">
+          <span>📖 六级阅读真题</span>
         </a>
 
         <!-- Voice Accent -->
@@ -1356,6 +1683,11 @@ def build():
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
         智能卡片
       </button>
+      <button class="tab-btn" data-tab="pane-highfreq" id="navBtnHighFreq">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2c.5 3.5 3.5 5.5 3.5 9.5a3.5 3.5 0 0 1-7 0c0-1.5.5-2.8 1.4-3.8C8.5 9 8 10.5 8 12a4 4 0 0 0 8 0c0-4.2-2.5-6.6-4-10z"/><path d="M8.5 14.5A3.5 3.5 0 0 0 12 18a3.5 3.5 0 0 0 3.5-3.5"/></svg>
+        真题高频词
+        <span class="tab-badge" id="badgeHighFreq">600</span>
+      </button>
       <button class="tab-btn" data-tab="pane-list">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
         词汇清单
@@ -1417,6 +1749,7 @@ def build():
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
                 </button>
               </div>
+              <div id="cardHfBadgeFront" class="hf-card-badge" style="display: none;"></div>
 
               <div class="card-hint">
                 <kbd>Space</kbd> 或 点击卡片查看释义
@@ -1427,12 +1760,14 @@ def build():
             <div class="flashcard-back">
               <div class="card-top-tags">
                 <span id="cardStatusTagBack" class="status-tag unlearned">未学习</span>
+                <span id="cardHfBadgeBack" class="hf-list-badge" style="display: none;"></span>
                 <span style="font-size: 12px; color: var(--text-muted);">再次点击翻转</span>
               </div>
 
               <div class="card-word" id="cardWordTextBack" style="font-size: 32px; margin-bottom: 8px;">abandon</div>
               <div class="card-trans" id="cardTransText">vt. 放弃, 遗弃; n. 放任, 狂热</div>
               <div class="card-detail-text" id="cardDetailText">v. 1. 抛弃，放弃 2. 离弃(家园、船只、飞机等) 3. 遗弃(妻、子女等)</div>
+              <div class="card-hf-example" id="cardHfExample" style="display: none;"></div>
 
               <div class="card-hint">
                 <kbd>1</kbd> 忘啦 &nbsp; <kbd>2</kbd> 模糊 &nbsp; <kbd>3</kbd> 记住 &nbsp; <kbd>4</kbd> 熟练
@@ -1465,6 +1800,155 @@ def build():
           <button class="nav-arrow-btn" id="prevCardBtn" title="上一个 (← 或 J)">← 上一个 (J)</button>
           <button class="nav-arrow-btn" id="flipCardBtn" title="翻转 (Space)">翻转卡片 (Space)</button>
           <button class="nav-arrow-btn" id="nextCardBtn" title="下一个 (→ 或 K)">下一个 (K) →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== PANE 1.5: HIGH FREQUENCY EXAM WORDS ====== -->
+    <div id="pane-highfreq" class="tab-pane">
+      <!-- Hero Dashboard -->
+      <section class="hf-hero-card">
+        <div class="hf-hero-top">
+          <div>
+            <div class="hf-hero-title">
+              <span>🔥 六级真题高频核心词库</span>
+              <span class="pos-tag" style="background: var(--danger); margin: 0;">考前必刷</span>
+            </div>
+            <p class="hf-hero-sub">基于 33 套阅读真题 + 27 套听力真题（共 60 套真题语料）实测词频统计，精准锁定高频考点与选词填空词库。</p>
+          </div>
+
+          <div class="hf-overall-prog">
+            <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; margin-bottom: 6px;">
+              <span style="color: var(--text-sub);">Top 600 核心高频掌握进度</span>
+              <span id="hfTop600ProgText" style="color: var(--success);">0 / 600 (0%)</span>
+            </div>
+            <div class="progress-track" style="height: 10px;">
+              <div id="hfTop600BarMastered" class="progress-seg seg-mastered" style="width: 0%;"></div>
+              <div id="hfTop600BarReview" class="progress-seg seg-review" style="width: 0%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hf-tier-grid">
+          <button type="button" class="hf-tier-card" data-hf-tier-jump="tier1">
+            <div class="hf-tier-title">
+              <span>👑 超高频必背</span>
+              <span style="font-size: 11px; color: var(--danger); font-weight: 700;">Top 1~150</span>
+            </div>
+            <div class="hf-tier-meta" id="hfTier1Meta">已掌握 0 / 150</div>
+            <div class="hf-mini-track"><div class="hf-mini-fill" id="hfTier1Fill" style="width: 0%;"></div></div>
+          </button>
+
+          <button type="button" class="hf-tier-card" data-hf-tier-jump="tier2">
+            <div class="hf-tier-title">
+              <span>⚡ 高频重点词</span>
+              <span style="font-size: 11px; color: var(--primary); font-weight: 700;">151~350</span>
+            </div>
+            <div class="hf-tier-meta" id="hfTier2Meta">已掌握 0 / 200</div>
+            <div class="hf-mini-track"><div class="hf-mini-fill" id="hfTier2Fill" style="width: 0%;"></div></div>
+          </button>
+
+          <button type="button" class="hf-tier-card" data-hf-tier-jump="tier3">
+            <div class="hf-tier-title">
+              <span>📌 次高频常考</span>
+              <span style="font-size: 11px; color: var(--pos-v); font-weight: 700;">351~600</span>
+            </div>
+            <div class="hf-tier-meta" id="hfTier3Meta">已掌握 0 / 250</div>
+            <div class="hf-mini-track"><div class="hf-mini-fill" id="hfTier3Fill" style="width: 0%;"></div></div>
+          </button>
+
+          <button type="button" class="hf-tier-card" data-hf-tier-jump="wordbank">
+            <div class="hf-tier-title">
+              <span>🎯 选词填空真题词库</span>
+              <span style="font-size: 11px; color: var(--warning); font-weight: 700;">Section A</span>
+            </div>
+            <div class="hf-tier-meta" id="hfTierWbMeta">已掌握 0 / 209</div>
+            <div class="hf-mini-track"><div class="hf-mini-fill" id="hfTierWbFill" style="width: 0%;"></div></div>
+          </button>
+        </div>
+
+        <div class="hf-action-bar">
+          <button id="hfStartCardBtn" class="icon-btn" style="background: var(--primary); color: #fff; border-color: var(--primary); font-weight: 600;">🗂️ 当前高频卡片速刷</button>
+          <button id="hfStartSpellBtn" class="icon-btn" style="background: var(--primary-subtle); color: var(--primary); border-color: var(--primary); font-weight: 600;">✍️ 当前高频拼写默写</button>
+          <button id="hfStartQuizBtn" class="icon-btn" style="font-weight: 600;">🎯 当前高频四选一挑战</button>
+          <button id="hfExportMdBtn" class="icon-btn">📄 导出高频词表 (.md)</button>
+        </div>
+      </section>
+
+      <!-- Multi-dimensional Filter Bar -->
+      <section class="hf-filter-bar">
+        <div class="hf-filter-row">
+          <div class="filter-group" id="hfCategoryGroup">
+            <button class="pill-filter active" data-hf-cat="top600">🔥 全部高频 600</button>
+            <button class="pill-filter" data-hf-cat="tier1">👑 超高频 Top 150</button>
+            <button class="pill-filter" data-hf-cat="tier2">⚡ 高频重点 151-350</button>
+            <button class="pill-filter" data-hf-cat="tier3">📌 次高频 351-600</button>
+            <button class="pill-filter" data-hf-cat="wordbank">🎯 选词填空词库</button>
+            <button class="pill-filter" data-hf-cat="options">🏆 题干选项高频</button>
+            <button class="pill-filter" data-hf-cat="listening">🎧 听力高频</button>
+          </div>
+        </div>
+
+        <div class="hf-filter-row">
+          <div class="filter-group">
+            <select id="hfSliceSelect" class="list-select" title="按50词分组练习"></select>
+            <select id="hfPosSelect" class="list-select" title="按词性筛选">
+              <option value="all">全部词性</option>
+              <option value="v">动词 (v.)</option>
+              <option value="n">名词 (n.)</option>
+              <option value="adj">形容词 (adj.)</option>
+              <option value="adv">副词 (adv.)</option>
+            </select>
+            <select id="hfStatusSelect" class="list-select" title="按掌握状态筛选">
+              <option value="all">全部状态</option>
+              <option value="unmastered">仅看未掌握 (未学+需复习)</option>
+              <option value="0">未学习</option>
+              <option value="1">需复习</option>
+              <option value="2">已掌握</option>
+              <option value="starred">⭐ 生词本</option>
+            </select>
+            <select id="hfSortSelect" class="list-select" title="排序方式">
+              <option value="rank">按综合真题考频</option>
+              <option value="wb">按选词填空考频优先</option>
+              <option value="qf">按选项出现次数优先</option>
+              <option value="alpha">按字母顺序 A-Z</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <div class="mask-options" id="hfMaskOptions">
+              <button class="mask-btn active" data-hf-mask="none" title="正常显示全部">👁️ 显示</button>
+              <button class="mask-btn" data-hf-mask="cn" title="遮住中文，鼠标悬停或点击查看">🙈 遮中文</button>
+              <button class="mask-btn" data-hf-mask="en" title="遮住英文与原句关键词，鼠标悬停或点击查看">🙊 遮英文</button>
+            </div>
+
+            <label class="checkbox-label" title="在列表中展示历年真题原句">
+              <input type="checkbox" id="hfShowExampleCheck" checked>
+              📖 显示真题例句
+            </label>
+
+            <div class="search-input-wrap" style="min-width: 180px;">
+              <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="hfSearchInput" class="search-input" placeholder="搜索高频词或释义...">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 13px; color: var(--text-muted); flex-wrap: wrap; gap: 8px;">
+        <span id="hfSummaryText">共筛选出 600 个高频词</span>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button id="hfBatchMasterPageBtn" class="icon-btn" style="padding: 4px 10px; font-size: 12px;">✓ 标记本页已掌握</button>
+        </div>
+      </div>
+
+      <div class="word-list-container" id="hfListContainer"></div>
+
+      <div class="list-pagination" id="hfPagination">
+        <span id="hfPageInfoText">第 1 / 1 页</span>
+        <div style="display: flex; gap: 8px;">
+          <button class="icon-btn" id="hfPrevPageBtn">上一页</button>
+          <button class="icon-btn" id="hfNextPageBtn">下一页</button>
         </div>
       </div>
     </div>
@@ -1605,6 +2089,11 @@ def build():
           <div style="display: flex; gap: 10px; align-items: center;">
             <select id="quizScopeSelect" class="list-select" style="padding: 4px 8px; font-size: 12px;">
               <option value="current">当前所选 List</option>
+              <option value="hf_150">🔥 真题超高频 Top 150</option>
+              <option value="hf_350">⚡ 真题高频 Top 350</option>
+              <option value="hf_600">📌 真题高频 Top 600</option>
+              <option value="hf_wb">🎯 选词填空真题词库</option>
+              <option value="hf_opt">🏆 题干与选项高频词</option>
               <option value="errors">仅测试需复习/错题</option>
               <option value="starred">仅测试生词本</option>
               <option value="random20">随机 20 题 (全库)</option>
@@ -1773,6 +2262,12 @@ def build():
   <script>
     // 2220 CET-6 Words Complete Dataset
     const RAW_WORDS = {words_json_str};
+    // Authentic Past-Exam High Frequency Dataset (keyed by word id)
+    const HF_DATA = {hf_json_str};
+
+    function getHfInfo(id) {{
+      return HF_DATA[String(id)] || null;
+    }}
 
     const STORAGE_KEY = 'cet6_study_data_v2';
 
@@ -1785,6 +2280,18 @@ def build():
       listSearchTerm: '',
       listPage: 1,
       listPageSize: 50,
+      hf: {{
+        cat: 'top600',
+        slice: 'all',
+        pos: 'all',
+        status: 'all',
+        sort: 'rank',
+        maskMode: 'none',
+        showExamples: true,
+        searchTerm: '',
+        page: 1,
+        pageSize: 50
+      }},
       cardIndex: 0,
       cardFlipped: false,
       autoAudio: true,
@@ -1954,6 +2461,10 @@ def build():
       if (planRC) planRC.textContent = review;
       const planUC = document.getElementById('planUnlearnedCount');
       if (planUC) planUC.textContent = total - mastered - review;
+
+      if (typeof updateHfDashboard === 'function') {{
+        updateHfDashboard();
+      }}
     }}
 
     function initDropdowns() {{
@@ -1973,27 +2484,51 @@ def build():
       cardSelect.appendChild(optAll.cloneNode(true));
       spellSelect.appendChild(optAll);
 
-      for (let i = 1; i <= totalLists; i++) {{
-        const start = (i - 1) * 50 + 1;
-        const end = Math.min(i * 50, RAW_WORDS.length);
-        const opt = document.createElement('option');
-        opt.value = String(i);
-        opt.textContent = `List ${{i.toString().padStart(2, '0')}} (${{start}} ~ ${{end}})`;
-        if (i === 1) opt.selected = true;
-        cardSelect.appendChild(opt.cloneNode(true));
-        listSelect.appendChild(opt.cloneNode(true));
-        spellSelect.appendChild(opt);
-      }}
+      // High-Frequency Exam Groups
+      const hfOptions = [
+        ['hf_150', '🔥 真题超高频 Top 150 (必背)'],
+        ['hf_350', '⚡ 真题高频 Top 350 (重点)'],
+        ['hf_600', '📌 真题高频 Top 600 (全库)'],
+        ['hf_wb', '🎯 历年选词填空词库真题词'],
+        ['hf_opt', '🏆 题干与选项高频考点词']
+      ];
+      [cardSelect, listSelect, spellSelect].forEach(sel => {{
+        const grp = document.createElement('optgroup');
+        grp.label = '🔥 真题高频专项';
+        hfOptions.forEach(([val, label]) => {{
+          const o = document.createElement('option');
+          o.value = val;
+          o.textContent = label;
+          grp.appendChild(o);
+        }});
+        sel.appendChild(grp);
+      }});
+
+      const listGrpLabel = '📚 顺序词表 (List 01 ~ 45)';
+      [cardSelect, listSelect, spellSelect].forEach(sel => {{
+        const grp = document.createElement('optgroup');
+        grp.label = listGrpLabel;
+        for (let i = 1; i <= totalLists; i++) {{
+          const start = (i - 1) * 50 + 1;
+          const end = Math.min(i * 50, RAW_WORDS.length);
+          const opt = document.createElement('option');
+          opt.value = String(i);
+          opt.textContent = `List ${{i.toString().padStart(2, '0')}} (${{start}} ~ ${{end}})`;
+          if (i === 1) opt.selected = true;
+          grp.appendChild(opt);
+        }}
+        sel.appendChild(grp);
+      }});
 
       const optStarred = document.createElement('option');
       optStarred.value = 'starred';
-      optStarred.textContent = '⭐ 仅拼写生词本';
+      optStarred.textContent = '⭐ 仅生词本词汇';
       cardSelect.appendChild(optStarred.cloneNode(true));
       spellSelect.appendChild(optStarred);
 
       const optReview = document.createElement('option');
       optReview.value = 'review';
-      optReview.textContent = '⚡ 仅拼写需复习词汇';
+      optReview.textContent = '⚡ 仅需复习词汇';
       cardSelect.appendChild(optReview.cloneNode(true));
       spellSelect.appendChild(optReview);
 
@@ -2010,6 +2545,26 @@ def build():
 
     function getWordsForSelection(selectionKey) {{
       if (selectionKey === 'all') return [...RAW_WORDS];
+      if (selectionKey === 'hf_150') {{
+        return RAW_WORDS.filter(w => {{ const h = getHfInfo(w.id); return h && h.r <= 150; }})
+          .sort((a, b) => getHfInfo(a.id).r - getHfInfo(b.id).r);
+      }}
+      if (selectionKey === 'hf_350') {{
+        return RAW_WORDS.filter(w => {{ const h = getHfInfo(w.id); return h && h.r <= 350; }})
+          .sort((a, b) => getHfInfo(a.id).r - getHfInfo(b.id).r);
+      }}
+      if (selectionKey === 'hf_600') {{
+        return RAW_WORDS.filter(w => {{ const h = getHfInfo(w.id); return h && h.r <= 600; }})
+          .sort((a, b) => getHfInfo(a.id).r - getHfInfo(b.id).r);
+      }}
+      if (selectionKey === 'hf_wb') {{
+        return RAW_WORDS.filter(w => {{ const h = getHfInfo(w.id); return h && h.wb > 0; }})
+          .sort((a, b) => (getHfInfo(b.id).wb - getHfInfo(a.id).wb) || (getHfInfo(a.id).r - getHfInfo(b.id).r));
+      }}
+      if (selectionKey === 'hf_opt') {{
+        return RAW_WORDS.filter(w => {{ const h = getHfInfo(w.id); return h && h.qf >= 3; }})
+          .sort((a, b) => (getHfInfo(b.id).qf - getHfInfo(a.id).qf) || (getHfInfo(a.id).r - getHfInfo(b.id).r));
+      }}
       if (selectionKey === 'starred') return RAW_WORDS.filter(w => isWordStarred(w.id));
       if (selectionKey === 'review') return RAW_WORDS.filter(w => getWordStatus(w.id) === 1);
       if (selectionKey === 'random20') return [...RAW_WORDS].sort(() => 0.5 - Math.random()).slice(0, 20);
@@ -2056,6 +2611,9 @@ def build():
         document.getElementById('cardPhoneticText').textContent = '';
         document.getElementById('cardTransText').textContent = '当前选择的分组暂无符合条件的单词';
         document.getElementById('cardDetailText').textContent = '请在上方切换分组或添加生词';
+        document.getElementById('cardHfBadgeFront').style.display = 'none';
+        document.getElementById('cardHfBadgeBack').style.display = 'none';
+        document.getElementById('cardHfExample').style.display = 'none';
         counter.textContent = '0 / 0';
         return;
       }}
@@ -2093,6 +2651,32 @@ def build():
       document.getElementById('cardWordTextBack').textContent = word.w;
       document.getElementById('cardTransText').innerHTML = formatTrans(word.t);
       document.getElementById('cardDetailText').innerHTML = word.d ? word.d : '大纲核心词汇，背诵时注意词性搭配与拼写';
+
+      const hf = getHfInfo(word.id);
+      const badgeFront = document.getElementById('cardHfBadgeFront');
+      const badgeBack = document.getElementById('cardHfBadgeBack');
+      const cardHfEx = document.getElementById('cardHfExample');
+
+      if (hf && (hf.tier > 0 || hf.wb > 0 || hf.qf >= 3)) {{
+        const wbTxt = hf.wb > 0 ? ` · 🎯选词库×${{hf.wb}}` : '';
+        const badgeLabel = hf.tier > 0
+          ? `🔥 真题高频 #${{hf.r}} · 出现${{hf.f}}次${{wbTxt}}`
+          : `🎯 选词填空词库×${{hf.wb}} · 真题${{hf.f}}次`;
+        badgeFront.textContent = badgeLabel;
+        badgeFront.style.display = 'inline-flex';
+        badgeBack.textContent = hf.tier > 0 ? `🔥 高频 #${{hf.r}}` : '🎯 选词库';
+        badgeBack.style.display = 'inline-flex';
+      }} else {{
+        badgeFront.style.display = 'none';
+        badgeBack.style.display = 'none';
+      }}
+
+      if (hf && hf.ex && hf.ex.en) {{
+        cardHfEx.innerHTML = `<span class="hf-example-src">📖 [${{escapeHtml(hf.ex.s)}}]</span>${{highlightKeywordInSentence(hf.ex.en, hf.ex.kw)}}`;
+        cardHfEx.style.display = 'block';
+      }} else {{
+        cardHfEx.style.display = 'none';
+      }}
 
       if (appState.autoAudio) {{
         playAudio(word.w);
@@ -2521,6 +3105,13 @@ def build():
         const s = getWordStatus(w.id);
         const starred = isWordStarred(w.id);
         const statusText = s === 2 ? '已掌握' : (s === 1 ? '需复习' : '未学');
+        const hf = getHfInfo(w.id);
+        let hfBadgeHtml = '';
+        if (hf && hf.tier > 0) {{
+          hfBadgeHtml = `<span class="hf-list-badge" title="历年真题出现 ${{hf.f}} 次 (${{hf.p}} 套试卷)">🔥#${{hf.r}}</span>`;
+        }} else if (hf && hf.wb > 0) {{
+          hfBadgeHtml = `<span class="hf-list-badge" title="选词填空词库真题词 (${{hf.wb}} 次)">🎯词库</span>`;
+        }}
 
         html += `
           <div class="word-row ${{maskClass}}" data-id="${{w.id}}">
@@ -2530,6 +3121,7 @@ def build():
               <button class="audio-play-btn" onclick="playAudio('${{w.w}}')" title="播放读音" style="width: 22px; height: 22px;">
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
               </button>
+              ${{hfBadgeHtml}}
             </div>
             <div class="col-phone">/${{w.p}}/</div>
             <div class="col-trans" onclick="this.classList.toggle('unmasked')">
@@ -2566,13 +3158,18 @@ def build():
     }}
 
     // ====== QUIZ ENGINE ======
-    function startQuiz() {{
+    function startQuiz(customWords = null) {{
+      const customPool = Array.isArray(customWords) ? customWords : null;
       const scope = document.getElementById('quizScopeSelect').value;
       let pool = [];
 
-      if (scope === 'current') {{
+      if (customPool) {{
+        pool = [...customPool];
+      }} else if (scope === 'current') {{
         const selList = document.getElementById('cardListSelect').value;
         pool = getWordsForSelection(selList);
+      }} else if (scope.startsWith('hf_')) {{
+        pool = getWordsForSelection(scope);
       }} else if (scope === 'errors') {{
         pool = RAW_WORDS.filter(w => getWordStatus(w.id) === 1);
       }} else if (scope === 'starred') {{
@@ -2585,7 +3182,7 @@ def build():
 
       if (pool.length < 4) {{
         alert('当前题库单词数量不足 4 个，请选择包含更多单词的测试范围！');
-        return;
+        return false;
       }}
 
       pool = [...pool].sort(() => 0.5 - Math.random());
@@ -2597,6 +3194,7 @@ def build():
       appState.quiz.answering = false;
 
       renderQuizQuestion();
+      return true;
     }}
 
     function renderQuizQuestion() {{
@@ -2766,6 +3364,339 @@ def build():
       URL.revokeObjectURL(url);
     }}
 
+    // ====== HIGH FREQUENCY EXAM WORDS ENGINE ======
+    function escapeHtml(str) {{
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }}
+
+    function highlightKeywordInSentence(sentence, kw) {{
+      const safeSent = escapeHtml(sentence);
+      if (!kw) return safeSent;
+      const safeKw = escapeHtml(kw).replace(/[.*+?^${{}}()|[\\]\\\\]/g, '\\\\$&');
+      const re = new RegExp('\\\\b(' + safeKw + ')\\\\b', 'gi');
+      return safeSent.replace(re, '<mark class="hf-kw" onclick="this.classList.toggle(\\'unmasked\\')">$1</mark>');
+    }}
+
+    function switchToTab(tabId) {{
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      const btn = document.querySelector(`.tab-btn[data-tab="${{tabId}}"]`);
+      if (btn) btn.classList.add('active');
+      const pane = document.getElementById(tabId);
+      if (pane) pane.classList.add('active');
+    }}
+
+    function getHfCategoryWords(cat) {{
+      let list = [];
+      if (cat === 'top600') {{
+        list = RAW_WORDS.filter(w => {{ const h = getHfInfo(w.id); return h && h.r <= 600; }});
+      }} else if (cat === 'tier1') {{
+        list = RAW_WORDS.filter(w => {{ const h = getHfInfo(w.id); return h && h.tier === 1; }});
+      }} else if (cat === 'tier2') {{
+        list = RAW_WORDS.filter(w => {{ const h = getHfInfo(w.id); return h && h.tier === 2; }});
+      }} else if (cat === 'tier3') {{
+        list = RAW_WORDS.filter(w => {{ const h = getHfInfo(w.id); return h && h.tier === 3; }});
+      }} else if (cat === 'wordbank') {{
+        list = RAW_WORDS.filter(w => {{ const h = getHfInfo(w.id); return h && h.wb > 0; }});
+      }} else if (cat === 'options') {{
+        list = RAW_WORDS.filter(w => {{ const h = getHfInfo(w.id); return h && h.qf >= 3; }});
+      }} else if (cat === 'listening') {{
+        list = RAW_WORDS.filter(w => {{ const h = getHfInfo(w.id); return h && h.lf >= 3; }});
+      }}
+
+      const sortBy = appState.hf.sort || 'rank';
+      list.sort((a, b) => {{
+        const ha = getHfInfo(a.id);
+        const hb = getHfInfo(b.id);
+        if (sortBy === 'wb') {{
+          return (hb.wb - ha.wb) || (ha.r - hb.r);
+        }}
+        if (sortBy === 'qf') {{
+          return (hb.qf - ha.qf) || (ha.r - hb.r);
+        }}
+        if (sortBy === 'alpha') {{
+          return a.w.localeCompare(b.w);
+        }}
+        if (cat === 'wordbank') {{
+          return (hb.wb - ha.wb) || (ha.r - hb.r);
+        }}
+        if (cat === 'options') {{
+          return (hb.qf - ha.qf) || (ha.r - hb.r);
+        }}
+        if (cat === 'listening') {{
+          return (hb.lf - ha.lf) || (ha.r - hb.r);
+        }}
+        return ha.r - hb.r;
+      }});
+      return list;
+    }}
+
+    function updateHfSliceDropdown() {{
+      const sel = document.getElementById('hfSliceSelect');
+      if (!sel) return;
+      const baseWords = getHfCategoryWords(appState.hf.cat);
+      const total = baseWords.length;
+      const numGroups = Math.ceil(total / 50);
+
+      const prevVal = appState.hf.slice || 'all';
+      sel.innerHTML = '';
+
+      const optAll = document.createElement('option');
+      optAll.value = 'all';
+      optAll.textContent = `全部当前分类 (${{total}} 词)`;
+      sel.appendChild(optAll);
+
+      for (let i = 1; i <= numGroups; i++) {{
+        const s = (i - 1) * 50 + 1;
+        const e = Math.min(i * 50, total);
+        const opt = document.createElement('option');
+        opt.value = String(i);
+        opt.textContent = `Group ${{String(i).padStart(2, '0')}} (${{s}} ~ ${{e}})`;
+        sel.appendChild(opt);
+      }}
+
+      if (prevVal !== 'all' && parseInt(prevVal, 10) <= numGroups) {{
+        sel.value = prevVal;
+      }} else {{
+        appState.hf.slice = 'all';
+        sel.value = 'all';
+      }}
+    }}
+
+    function getHfFilteredWords(ignoreSlice = false) {{
+      const hfState = appState.hf;
+      let words = getHfCategoryWords(hfState.cat);
+
+      if (!ignoreSlice && hfState.slice !== 'all') {{
+        const gIdx = parseInt(hfState.slice, 10);
+        if (!isNaN(gIdx) && gIdx >= 1) {{
+          const start = (gIdx - 1) * 50;
+          words = words.slice(start, start + 50);
+        }}
+      }}
+
+      if (hfState.pos !== 'all') {{
+        words = words.filter(w => {{
+          const h = getHfInfo(w.id);
+          return h && h.pos === hfState.pos;
+        }});
+      }}
+
+      if (hfState.status === 'unmastered') {{
+        words = words.filter(w => getWordStatus(w.id) !== 2);
+      }} else if (hfState.status === '0' || hfState.status === '1' || hfState.status === '2') {{
+        const targetS = parseInt(hfState.status, 10);
+        words = words.filter(w => getWordStatus(w.id) === targetS);
+      }} else if (hfState.status === 'starred') {{
+        words = words.filter(w => isWordStarred(w.id));
+      }}
+
+      const term = (hfState.searchTerm || '').trim().toLowerCase();
+      if (term) {{
+        words = words.filter(w =>
+          w.w.toLowerCase().includes(term) ||
+          (w.t && w.t.toLowerCase().includes(term)) ||
+          (w.d && w.d.toLowerCase().includes(term))
+        );
+      }}
+
+      return words;
+    }}
+
+    function updateHfDashboard() {{
+      const top600 = RAW_WORDS.filter(w => {{ const h = getHfInfo(w.id); return h && h.r <= 600; }});
+      const t1 = top600.filter(w => getHfInfo(w.id).tier === 1);
+      const t2 = top600.filter(w => getHfInfo(w.id).tier === 2);
+      const t3 = top600.filter(w => getHfInfo(w.id).tier === 3);
+      const wb = RAW_WORDS.filter(w => {{ const h = getHfInfo(w.id); return h && h.wb > 0; }});
+
+      const countMastered = (arr) => arr.reduce((acc, w) => acc + (getWordStatus(w.id) === 2 ? 1 : 0), 0);
+      const countReview = (arr) => arr.reduce((acc, w) => acc + (getWordStatus(w.id) === 1 ? 1 : 0), 0);
+
+      const m600 = countMastered(top600);
+      const r600 = countReview(top600);
+      const total600 = top600.length || 600;
+      const pct600 = Math.round((m600 / total600) * 100);
+      const pctR600 = Math.round((r600 / total600) * 100);
+
+      const badge = document.getElementById('badgeHighFreq');
+      if (badge) badge.textContent = total600;
+
+      const progTxt = document.getElementById('hfTop600ProgText');
+      if (progTxt) progTxt.textContent = `${{m600}} / ${{total600}} (${{pct600}}%)`;
+      const barM = document.getElementById('hfTop600BarMastered');
+      if (barM) barM.style.width = pct600 + '%';
+      const barR = document.getElementById('hfTop600BarReview');
+      if (barR) barR.style.width = pctR600 + '%';
+
+      const tiers = [
+        [t1, 'hfTier1Meta', 'hfTier1Fill'],
+        [t2, 'hfTier2Meta', 'hfTier2Fill'],
+        [t3, 'hfTier3Meta', 'hfTier3Fill'],
+        [wb, 'hfTierWbMeta', 'hfTierWbFill']
+      ];
+      tiers.forEach(([arr, metaId, fillId]) => {{
+        const m = countMastered(arr);
+        const tot = arr.length || 1;
+        const pct = Math.round((m / tot) * 100);
+        const metaEl = document.getElementById(metaId);
+        const fillEl = document.getElementById(fillId);
+        if (metaEl) metaEl.textContent = `已掌握 ${{m}} / ${{arr.length}} (${{pct}}%)`;
+        if (fillEl) fillEl.style.width = pct + '%';
+      }});
+
+      document.querySelectorAll('.hf-tier-card').forEach(card => {{
+        card.classList.toggle('active', card.dataset.hfTierJump === appState.hf.cat);
+      }});
+    }}
+
+    function renderHighFreqPane() {{
+      updateHfDashboard();
+      const container = document.getElementById('hfListContainer');
+      if (!container) return;
+
+      const words = getHfFilteredWords(false);
+      document.getElementById('hfSummaryText').textContent = `共筛选出 ${{words.length}} 个真题高频词`;
+
+      const pageSize = appState.hf.pageSize || 50;
+      const totalPages = Math.ceil(words.length / pageSize) || 1;
+      if (appState.hf.page > totalPages) appState.hf.page = totalPages;
+      if (appState.hf.page < 1) appState.hf.page = 1;
+
+      document.getElementById('hfPageInfoText').textContent = `第 ${{appState.hf.page}} / ${{totalPages}} 页 (${{words.length}} 词)`;
+
+      const start = (appState.hf.page - 1) * pageSize;
+      const pageWords = words.slice(start, start + pageSize);
+
+      if (pageWords.length === 0) {{
+        container.innerHTML = `
+          <div style="padding: 48px; text-align: center; color: var(--text-muted);">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom: 8px;"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            <p>当前筛选条件下暂无符合的高频词，试试切换分类或放宽筛选条件。</p>
+          </div>
+        `;
+        return;
+      }}
+
+      const maskClass = appState.hf.maskMode === 'cn' ? 'mask-cn' : (appState.hf.maskMode === 'en' ? 'mask-en' : '');
+      const showEx = appState.hf.showExamples;
+      let html = '';
+
+      pageWords.forEach(w => {{
+        const hf = getHfInfo(w.id);
+        const s = getWordStatus(w.id);
+        const starred = isWordStarred(w.id);
+        const statusText = s === 2 ? '已掌握' : (s === 1 ? '需复习' : '未学');
+
+        const tierClass = hf.tier === 1 ? 'tier-1' : (hf.tier === 2 ? 'tier-2' : (hf.tier === 3 ? 'tier-3' : 'tier-0'));
+        const rankLabel = hf.tier > 0 ? `#${{hf.r}}` : '词库';
+        const starsStr = hf.tier === 1 ? '★★★★★' : (hf.tier === 2 ? '★★★★' : (hf.tier === 3 ? '★★★' : '🎯 考点'));
+
+        const wbPill = hf.wb > 0 ? `<span class="hf-pill wb">🎯 选词库×${{hf.wb}}</span>` : '';
+        const qfPill = hf.qf > 0 ? `<span class="hf-pill opt">🏆 选项×${{hf.qf}}</span>` : '';
+        const exHtml = (showEx && hf.ex && hf.ex.en)
+          ? `<div class="hf-example-box"><span class="hf-example-src">[${{escapeHtml(hf.ex.s)}}]</span>${{highlightKeywordInSentence(hf.ex.en, hf.ex.kw)}}</div>`
+          : '';
+
+        html += `
+          <div class="hf-row ${{maskClass}}" data-id="${{w.id}}">
+            <div class="hf-rank-col">
+              <span class="hf-rank-badge ${{tierClass}}">${{rankLabel}}</span>
+              <span class="hf-stars">${{starsStr}}</span>
+            </div>
+
+            <div class="hf-word-col">
+              <div class="hf-word-head">
+                <span class="col-word-text" onclick="this.classList.toggle('unmasked')">${{escapeHtml(w.w)}}</span>
+                <button class="audio-play-btn" onclick="playAudio('${{w.w}}')" title="播放读音" style="width: 24px; height: 24px;">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                </button>
+              </div>
+              <div class="col-phone">/${{escapeHtml(w.p)}}/</div>
+              <div class="hf-meta-pills">
+                <span class="hf-pill hot">🔥 ${{hf.f}}次 · ${{hf.p}}套</span>
+                <span class="hf-pill">阅${{hf.rf}} / 听${{hf.lf}}</span>
+                ${{wbPill}}
+                ${{qfPill}}
+              </div>
+            </div>
+
+            <div class="hf-trans-col col-trans" onclick="this.classList.toggle('unmasked')">
+              <div>${{formatTrans(w.t)}}</div>
+              ${{w.d ? `<div class="col-detail-sub">${{escapeHtml(w.d)}}</div>` : ''}}
+              ${{exHtml}}
+            </div>
+
+            <div class="hf-status-col col-status">
+              <span class="badge-status s${{s}}" onclick="cycleHfWordStatus(${{w.id}})" title="点击切换状态">${{statusText}}</span>
+            </div>
+
+            <div class="hf-star-col col-star" style="text-align: right;">
+              <button class="star-btn ${{starred ? 'starred' : ''}}" onclick="toggleHfWordStar(${{w.id}}, this)" title="加入生词本">★</button>
+            </div>
+          </div>
+        `;
+      }});
+
+      container.innerHTML = html;
+    }}
+
+    function cycleHfWordStatus(id) {{
+      const current = getWordStatus(id);
+      const next = (current + 1) % 3;
+      setWordStatus(id, next);
+      renderHighFreqPane();
+    }}
+
+    function toggleHfWordStar(id, btn) {{
+      const isSt = toggleWordStar(id);
+      if (isSt) btn.classList.add('starred');
+      else btn.classList.remove('starred');
+    }}
+
+    function jumpToHfCategory(cat) {{
+      appState.hf.cat = cat;
+      appState.hf.slice = 'all';
+      appState.hf.page = 1;
+      document.querySelectorAll('#hfCategoryGroup .pill-filter').forEach(b => {{
+        b.classList.toggle('active', b.dataset.hfCat === cat);
+      }});
+      updateHfSliceDropdown();
+      renderHighFreqPane();
+    }}
+
+    function exportHighFreqMarkdown() {{
+      const words = getHfFilteredWords(false);
+      if (words.length === 0) {{
+        alert('当前筛选条件下暂无高频词可导出');
+        return;
+      }}
+      let text = `# CET-6 真题高频核心词表 (${{words.length}} 词)\\n\\n`;
+      words.forEach((w, i) => {{
+        const hf = getHfInfo(w.id);
+        const rankStr = hf && hf.tier > 0 ? `#${{hf.r}}` : '词库';
+        const freqStr = hf ? `真题${{hf.f}}次/${{hf.p}}套` : '';
+        text += `${{i + 1}}. [${{rankStr}}] **${{w.w}}** [/${{w.p}}/] (${{freqStr}}) — ${{w.t}}\\n`;
+        if (hf && hf.ex && hf.ex.en) {{
+          text += `   > [${{hf.ex.s}}] ${{hf.ex.en}}\\n`;
+        }}
+      }});
+
+      const blob = new Blob([text], {{ type: 'text/markdown;charset=utf-8' }});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `CET6_真题高频词_${{appState.hf.cat}}_${{new Date().toISOString().slice(0, 10)}}.md`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }}
+
     // ====== EBBINGHAUS TABLE GENERATOR ======
     function renderEbbinghausTable() {{
       const tbody = document.getElementById('ebbinghausTableBody');
@@ -2833,6 +3764,7 @@ def build():
             saveState();
             setupCardQueue();
             renderWordList();
+            renderHighFreqPane();
             renderEbbinghausTable();
             alert('🎉 学习进度恢复成功！');
           }} else {{
@@ -2876,6 +3808,7 @@ def build():
       }};
 
       initDropdowns();
+      updateHfSliceDropdown();
       setupCardQueue();
       updateGlobalStatsUI();
       renderEbbinghausTable();
@@ -2889,6 +3822,7 @@ def build():
           const target = btn.dataset.tab;
           document.getElementById(target).classList.add('active');
 
+          if (target === 'pane-highfreq') renderHighFreqPane();
           if (target === 'pane-list') renderWordList();
           if (target === 'pane-spell') startSpellPractice();
           if (target === 'pane-quiz') startQuiz();
@@ -2949,9 +3883,9 @@ def build():
         renderWordList();
       }};
 
-      document.querySelectorAll('.pill-filter').forEach(btn => {{
+      document.querySelectorAll('#pane-list .pill-filter').forEach(btn => {{
         btn.onclick = () => {{
-          document.querySelectorAll('.pill-filter').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('#pane-list .pill-filter').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           appState.listStatusFilter = btn.dataset.statusFilter;
           appState.listPage = 1;
@@ -2959,14 +3893,149 @@ def build():
         }};
       }});
 
-      document.querySelectorAll('.mask-btn').forEach(btn => {{
+      document.querySelectorAll('#pane-list .mask-btn').forEach(btn => {{
         btn.onclick = () => {{
-          document.querySelectorAll('.mask-btn').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('#pane-list .mask-btn').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           appState.listMaskMode = btn.dataset.mask;
           renderWordList();
         }};
       }});
+
+      // High-Frequency Events
+      document.querySelectorAll('.hf-tier-card').forEach(card => {{
+        card.onclick = () => {{
+          const targetCat = card.dataset.hfTierJump;
+          if (targetCat) jumpToHfCategory(targetCat);
+        }};
+      }});
+
+      document.querySelectorAll('#hfCategoryGroup .pill-filter').forEach(btn => {{
+        btn.onclick = () => {{
+          jumpToHfCategory(btn.dataset.hfCat);
+        }};
+      }});
+
+      document.getElementById('hfSliceSelect').onchange = (e) => {{
+        appState.hf.slice = e.target.value;
+        appState.hf.page = 1;
+        renderHighFreqPane();
+      }};
+
+      document.getElementById('hfPosSelect').onchange = (e) => {{
+        appState.hf.pos = e.target.value;
+        appState.hf.page = 1;
+        renderHighFreqPane();
+      }};
+
+      document.getElementById('hfStatusSelect').onchange = (e) => {{
+        appState.hf.status = e.target.value;
+        appState.hf.page = 1;
+        renderHighFreqPane();
+      }};
+
+      document.getElementById('hfSortSelect').onchange = (e) => {{
+        appState.hf.sort = e.target.value;
+        appState.hf.page = 1;
+        updateHfSliceDropdown();
+        renderHighFreqPane();
+      }};
+
+      document.querySelectorAll('#hfMaskOptions .mask-btn').forEach(btn => {{
+        btn.onclick = () => {{
+          document.querySelectorAll('#hfMaskOptions .mask-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          appState.hf.maskMode = btn.dataset.hfMask;
+          renderHighFreqPane();
+        }};
+      }});
+
+      document.getElementById('hfShowExampleCheck').onchange = (e) => {{
+        appState.hf.showExamples = e.target.checked;
+        renderHighFreqPane();
+      }};
+
+      document.getElementById('hfSearchInput').oninput = (e) => {{
+        appState.hf.searchTerm = e.target.value;
+        appState.hf.page = 1;
+        renderHighFreqPane();
+      }};
+
+      document.getElementById('hfPrevPageBtn').onclick = () => {{
+        if (appState.hf.page > 1) {{
+          appState.hf.page--;
+          renderHighFreqPane();
+          window.scrollTo({{ top: 320, behavior: 'smooth' }});
+        }}
+      }};
+
+      document.getElementById('hfNextPageBtn').onclick = () => {{
+        const totalWords = getHfFilteredWords(false).length;
+        const totalPages = Math.ceil(totalWords / (appState.hf.pageSize || 50)) || 1;
+        if (appState.hf.page < totalPages) {{
+          appState.hf.page++;
+          renderHighFreqPane();
+          window.scrollTo({{ top: 320, behavior: 'smooth' }});
+        }}
+      }};
+
+      document.getElementById('hfBatchMasterPageBtn').onclick = () => {{
+        const words = getHfFilteredWords(false);
+        const pageSize = appState.hf.pageSize || 50;
+        const start = (appState.hf.page - 1) * pageSize;
+        const pageWords = words.slice(start, start + pageSize);
+        if (pageWords.length === 0) return;
+        if (confirm(`确定将当前页展示的 ${{pageWords.length}} 个高频词全部标记为「已掌握」吗？`)) {{
+          pageWords.forEach(w => setWordStatus(w.id, 2));
+          renderHighFreqPane();
+        }}
+      }};
+
+      document.getElementById('hfStartCardBtn').onclick = () => {{
+        const words = getHfFilteredWords(false);
+        if (words.length === 0) {{
+          alert('当前筛选条件下没有高频词可供卡片背诵！');
+          return;
+        }}
+        let queue = [...words];
+        if (appState.shuffleCards) {{
+          for (let i = queue.length - 1; i > 0; i--) {{
+            const j = Math.floor(Math.random() * (i + 1));
+            [queue[i], queue[j]] = [queue[j], queue[i]];
+          }}
+        }}
+        const catToSelect = {{ top600: 'hf_600', tier1: 'hf_150', wordbank: 'hf_wb', options: 'hf_opt' }};
+        if (catToSelect[appState.hf.cat]) {{
+          document.getElementById('cardListSelect').value = catToSelect[appState.hf.cat];
+        }}
+        appState.cardQueue = queue;
+        appState.cardIndex = 0;
+        appState.cardFlipped = false;
+        switchToTab('pane-card');
+        renderCurrentCard();
+      }};
+
+      document.getElementById('hfStartSpellBtn').onclick = () => {{
+        const words = getHfFilteredWords(false);
+        if (words.length === 0) {{
+          alert('当前筛选条件下没有高频词可供拼写默写！');
+          return;
+        }}
+        switchToTab('pane-spell');
+        startSpellPractice(words);
+      }};
+
+      document.getElementById('hfStartQuizBtn').onclick = () => {{
+        const words = getHfFilteredWords(false);
+        if (words.length < 4) {{
+          alert('当前筛选出的高频词不足 4 个，请放宽筛选条件后再开始四选一挑战！');
+          return;
+        }}
+        switchToTab('pane-quiz');
+        startQuiz(words);
+      }};
+
+      document.getElementById('hfExportMdBtn').onclick = exportHighFreqMarkdown;
 
       document.getElementById('listSearchInput').oninput = (e) => {{
         appState.listSearchTerm = e.target.value;
